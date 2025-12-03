@@ -1,0 +1,32 @@
+repositoryID: common-chart-wasilak
+owners:
+  - name: wasilak
+    email: piotr.m.boruc@gmail.com
+scannerDisabled: false
+shortURL: ""
+displayName: Common Chart
+description: A comprehensive, production-ready Helm chart for deploying applications on Kubernetes
+keywords:
+  - helm
+  - kubernetes
+  - deployment
+  - application
+  - chart
+  - workload
+  - statefulset
+  - daemonset
+  - ingress
+  - rbac
+links:
+  - name: Source code
+    url: https://github.com/wasilak/common-chart
+  - name: Changelog
+    url: https://github.com/wasilak/common-chart/releases
+  - name: GitHub
+    url: https://github.com/wasilak/common-chart
+  - name: Issues
+    url: https://github.com/wasilak/common-chart/issues
+license: MIT
+homePageURL: https://github.com/wasilak/common-chart
+signKey:
+  fingerprint: ""
