@@ -4,8 +4,10 @@ repos:
     hooks:
       - id: trailing-whitespace
         name: Trim trailing whitespace
+        exclude: ^README\.md$
       - id: end-of-file-fixer
         name: Fix end of file
+        exclude: ^README\.md$
       - id: check-yaml
         name: Check YAML syntax
         exclude: ^templates/

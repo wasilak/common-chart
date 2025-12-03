@@ -1,9 +1,8 @@
 apiVersion: v2
 name: common
 description: A comprehensive, production-ready Helm chart for deploying applications on Kubernetes
-type: application
+type: library
 version: 1.0.1
-appVersion: 1.0.0
 
 maintainers:
   - email: piotr.m.boruc@gmail.com
