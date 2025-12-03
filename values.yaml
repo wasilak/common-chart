@@ -37,7 +37,7 @@ annotations: {}
 podAnnotations: {}
 
 nodeSelector: {}
-tolerations: {}
+tolerations: []
 affinity: {}
 
 resources: {}

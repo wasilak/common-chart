@@ -238,7 +238,26 @@
       "description": "Volume mounts for the container",
       "default": [],
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the volume"
+          },
+          "mountPath": {
+            "type": "string",
+            "description": "Mount path in the container"
+          },
+          "readOnly": {
+            "type": "boolean",
+            "description": "Mount as read-only",
+            "default": false
+          },
+          "subPath": {
+            "type": "string",
+            "description": "SubPath within the volume"
+          }
+        }
       }
     },
     "volumes": {
@@ -248,17 +267,71 @@
         "emptyDir": {
           "type": "array",
           "description": "EmptyDir volumes",
-          "default": []
+          "default": [],
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the volume"
+              },
+              "sizeLimit": {
+                "type": "string",
+                "description": "Size limit for emptyDir (e.g., 1Gi)"
+              }
+            }
+          }
         },
         "hostPath": {
           "type": "array",
           "description": "HostPath volumes",
-          "default": []
+          "default": [],
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the volume"
+              },
+              "path": {
+                "type": "string",
+                "description": "Path on the host"
+              },
+              "type": {
+                "type": "string",
+                "description": "Type of path (e.g., Directory, File, Socket)"
+              }
+            }
+          }
         },
         "configMap": {
           "type": "array",
           "description": "ConfigMap volumes",
-          "default": []
+          "default": [],
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the volume"
+              },
+              "configMapName": {
+                "type": "string",
+                "description": "Name of the ConfigMap"
+              },
+              "defaultMode": {
+                "type": "integer",
+                "description": "Default permissions (e.g., 0644)"
+              },
+              "items": {
+                "type": "array",
+                "description": "Specific keys to include",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -289,7 +362,39 @@
       "description": "Sidecar containers",
       "default": [],
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the sidecar container"
+          },
+          "image": {
+            "type": "string",
+            "description": "Image for the sidecar"
+          },
+          "securityContext": {
+            "type": "object",
+            "description": "Security context for the sidecar"
+          },
+          "env": {
+            "type": "array",
+            "description": "Environment variables for the sidecar",
+            "items": {
+              "type": "object"
+            }
+          },
+          "volumeMounts": {
+            "type": "array",
+            "description": "Volume mounts for the sidecar",
+            "items": {
+              "type": "object"
+            }
+          },
+          "resources": {
+            "type": "object",
+            "description": "Resource requests/limits for the sidecar"
+          }
+        }
       }
     },
     "configMaps": {
@@ -297,9 +402,39 @@
       "description": "ConfigMaps to create",
       "default": [],
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "isExternal": {
+            "type": "boolean",
+            "description": "Whether this ConfigMap already exists (don't create)",
+            "default": false
+          },
+          "immutable": {
+            "type": "boolean",
+            "description": "Whether ConfigMap is immutable",
+            "default": false
+          },
+          "files": {
+            "type": "array",
+            "description": "Files to include in ConfigMap",
+            "items": {
+              "type": "object",
+              "properties": {
+                "filename": {
+                  "type": "string",
+                  "description": "Name of the file key in ConfigMap"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "Content of the file"
+                }
+              }
+            }
+          }
+        }
       }
     },
+
     "podDisruptionBudget": {
       "type": "object",
       "description": "Pod Disruption Budget configuration",
@@ -541,9 +676,41 @@
               },
               "path": {
                 "type": "string",
-                "description": "Metrics path"
+                "description": "Metrics path",
+                "default": "/metrics"
+              },
+              "interval": {
+                "type": "string",
+                "description": "Scrape interval (e.g., 30s, 1m)"
+              },
+              "relabelings": {
+                "type": "array",
+                "description": "Relabeling rules for scraped metrics",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "metricRelabelings": {
+                "type": "array",
+                "description": "Metric relabeling rules",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "bearerTokenSecret": {
+                "type": "object",
+                "description": "Bearer token secret for scraping"
               }
             }
+          },
+          "nonHTTP": {
+            "type": "boolean",
+            "description": "Whether this is a non-HTTP port (for TCP/UDP ingress)",
+            "default": false
+          },
+          "entryPoint": {
+            "type": "string",
+            "description": "Traefik entry point name for TCP/UDP routing"
           }
         }
       }
@@ -571,7 +738,34 @@
         "hosts": {
           "type": "array",
           "description": "Ingress hosts",
-          "default": []
+          "default": [],
+          "items": {
+            "type": "object",
+            "properties": {
+              "host": {
+                "type": "string",
+                "description": "Hostname for the ingress"
+              },
+              "paths": {
+                "type": "array",
+                "description": "Paths for the hostname",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "description": "URL path"
+                    },
+                    "pathType": {
+                      "type": "string",
+                      "description": "Path type (Prefix, Exact, ImplementationSpecific)",
+                      "enum": ["Prefix", "Exact", "ImplementationSpecific"]
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -612,15 +806,33 @@
           "default": false
         },
         "type": {
-          "type": "string",
-          "description": "Authentication type",
-          "enum": ["forwardauth-authelia"],
-          "default": "forwardauth-authelia"
-        },
+           "type": "string",
+           "description": "Authentication type",
+           "enum": ["forwardauth-authelia", "traefik-oidc-auth"],
+           "default": "forwardauth-authelia"
+         },
         "oidc": {
-          "type": "object",
-          "description": "OIDC configuration"
-        },
+           "type": "object",
+           "description": "OIDC configuration",
+           "properties": {
+             "clientId": {
+               "type": "string",
+               "description": "OIDC client ID (can be a reference like urn:k8s:secret:namespace:KEY)"
+             },
+             "clientSecret": {
+               "type": "string",
+               "description": "OIDC client secret (can be a reference like urn:k8s:secret:namespace:KEY)"
+             },
+             "secret": {
+               "type": "string",
+               "description": "OIDC secret (can be a reference like urn:k8s:secret:namespace:KEY)"
+             },
+             "secretName": {
+               "type": "string",
+               "description": "Name of the secret containing OIDC credentials"
+             }
+           }
+         },
         "url": {
           "type": "string",
           "description": "Authentication service URL"
@@ -644,16 +856,25 @@
       }
     },
     "externalSecret": {
-      "type": "object",
-      "description": "External Secret configuration",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "description": "Enable external secrets",
-          "default": false
-        }
-      }
-    },
+       "type": "object",
+       "description": "External Secret configuration",
+       "properties": {
+         "enabled": {
+           "type": "boolean",
+           "description": "Enable external secrets",
+           "default": false
+         },
+         "name": {
+           "type": "string",
+           "description": "Name of the external secret resource"
+         },
+         "refreshInterval": {
+           "type": "string",
+           "description": "Refresh interval for external secret (e.g., 1h0m0s)",
+           "default": "1h0m0s"
+         }
+       }
+     },
     "serviceMonitor": {
       "type": "object",
       "description": "Prometheus ServiceMonitor configuration",

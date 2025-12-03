@@ -1,6 +1,6 @@
 # common
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-informational?style=flat-square)
+![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-informational?style=flat-square)
 
 A comprehensive, production-ready Helm chart for deploying applications on Kubernetes
 
@@ -332,7 +332,7 @@ For issues, feature requests, or questions:
 | annotations | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
 | nodeSelector | object | `{}` |  |
-| tolerations | object | `{}` |  |
+| tolerations | list | `[]` |  |
 | affinity | object | `{}` |  |
 | resources | object | `{}` |  |
 | env | list | `[]` |  |
@@ -428,3 +428,4 @@ For issues, feature requests, or questions:
 | tracing.datadog.agentHost | string | `"datadog-agent.datadog.svc.cluster.local"` |  |
 | tracing.datadog.agentPort | int | `8126` |  |
 | logging.sidecars | list | `[]` |  |
+
