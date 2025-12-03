@@ -1,0 +1,61 @@
+{{- if eq (.Values.type) "statefulset" -}}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: "{{ include "fullname" $ }}"
+  {{- include "annotations" $ | indent 2 }}
+  {{- include "labels" $ | indent 2 }}
+spec:
+  serviceName: "{{ include "fullname" $ }}"
+  replicas: {{ $.Values.statefulset.replicaCount}}
+  podManagementPolicy: {{ $.Values.statefulset.podManagementPolicy | quote }}
+  {{- if $.Values.statefulset.updateStrategy }}
+  updateStrategy:
+    {{- toYaml $.Values.statefulset.updateStrategy | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: "{{ include "fullname" $ }}"
+
+  {{- include "volumeClaimTemplates" $  | indent 2 }}
+
+  template:
+    metadata:
+      {{- include "podAnnotations" $  | indent 6 }}
+      {{- include "podLabels" $ | indent 6 }}
+    spec:
+      {{- include "podSpec" $ | indent 6 }}
+
+      {{- include "statefulsetVolumes" $ | indent 6 }}
+
+      {{- if $.Values.initContainers }}
+      initContainers:
+        {{- toYaml $.Values.initContainers | nindent 8 }}
+      {{- end }}
+
+      containers:
+        {{- include "container" $ | indent 8 }}
+
+        {{- range $.Values.sidecars }}
+        - name: "{{ .name }}"
+          image: "{{ .image.registry | default $.Values.image.registry }}/{{ .image.repository }}{{ if .image.digest }}@{{ .image.digest }}{{ else }}:{{ .image.tag }}{{ end }}"
+          imagePullPolicy: "{{ .image.pullPolicy | default $.Values.image.pullPolicy }}"
+          {{- if .securityContext }}
+          securityContext:
+            {{- toYaml .securityContext | nindent 12 }}
+          {{- end }}
+          {{- if .env }}
+          env:
+            {{- toYaml .env | nindent 12 }}
+          {{- end }}
+          {{- if .volumeMounts }}
+          volumeMounts:
+            {{- toYaml .volumeMounts | nindent 12 }}
+          {{- end }}
+          {{- if .resources }}
+          resources:
+            {{- toYaml .resources | nindent 12 }}
+          {{- end }}
+        {{- end }}
+{{- end -}}

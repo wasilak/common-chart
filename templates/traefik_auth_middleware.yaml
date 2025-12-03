@@ -1,0 +1,40 @@
+{{- if $.Values.auth.enabled -}}
+---
+apiVersion: "traefik.io/v1alpha1"
+kind: "Middleware"
+metadata:
+  name: "{{ $.Values.auth.type }}-{{ include "fullname" $ }}"
+  {{- include "annotations" $ | indent 2 }}
+  {{- include "labels" $ | indent 2 }}
+{{ if eq $.Values.auth.type "forwardauth-authelia" -}}
+spec:
+  forwardAuth:
+    address: "{{ $.Values.auth.url }}"
+    authResponseHeaders:
+      - "Remote-User"
+      - "Remote-Groups"
+      - "Remote-Name"
+      - "Remote-Email"
+    trustForwardHeader: true
+{{- end -}}
+{{ if eq $.Values.auth.type "traefik-oidc-auth" -}}
+{{- $secretName := $.Values.externalSecret.name | default (include "fullname" $) }}
+spec:
+  plugin:
+    traefik-oidc-auth:
+      Provider:
+        ClientId: "{{- $.Values.auth.oidc.clientId | default (printf "urn:k8s:secret:%s-external-secret:OIDC_PLUGIN_CLIENT_ID" $secretName) -}}"
+        ClientSecret: "{{- $.Values.auth.oidc.clientSecret | default (printf "urn:k8s:secret:%s-external-secret:OIDC_PLUGIN_CLIENT_SECRET" $secretName) -}}"
+        # TokenValidation: IdToken
+        Url: "{{ $.Values.auth.url }}"
+        UsePkce: true
+      Scopes:
+        - openid
+        - profile
+        - email
+        - groups
+      Secret: "{{- $.Values.auth.oidc.secret | default (printf "urn:k8s:secret:%s-external-secret:OIDC_PLUGIN_SECRET" $secretName) -}}"
+      # SessionCookie:
+      #   Domain: .otteryak.foo
+{{- end -}}
+{{- end -}}

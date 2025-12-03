@@ -1,0 +1,167 @@
+{{- range $.Values.ports }}
+{{- if not .nonHTTP -}}
+{{- if .ingressEnabled | default true }}
+{{- $portName := .name }}
+{{- $hosts := $.Values.ingress.hosts }}
+{{- $middlewares := list }}
+{{- if $.Values.https.redirect }}
+  {{- $middlewares = append $middlewares (printf "%s-redirect-https-%s@kubernetescrd" $.Release.Namespace (include "fullname" $)) }}
+{{- end }}
+{{- if $.Values.auth.enabled }}
+  {{- $middlewares = append $middlewares (printf "%s-%s-%s@kubernetescrd" $.Release.Namespace $.Values.auth.type (include "fullname" $)) }}
+{{- end }}
+
+{{- if $.Values.https.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  {{- include "labels" $ | indent 2 }}
+  annotations:
+    spec.ingressClassName: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: "web"
+    {{- if $middlewares }}
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ join "," $middlewares }}"
+    {{- end }}
+  name: "{{ include "fullname" $ }}-{{ .name }}-http"
+spec:
+  ingressClassName: traefik
+  rules:
+{{- if empty $hosts }}
+    - host: "{{ include "fullname" $ }}.{{ $.Release.Namespace }}.svc.cluster.local"
+      http:
+        paths:
+          - path: "/"
+            backend:
+              service:
+                name: "{{ include "fullname" $ }}"
+                port:
+                  name: {{ $portName }}
+            pathType: ImplementationSpecific
+{{- else }}
+{{- range $hosts }}
+    - host: "{{ if kindIs "map" . }}{{ .host }}{{ else }}{{ . }}{{ end }}"
+      http:
+        paths:
+{{- if kindIs "map" . }}
+{{- if .paths }}
+{{- range .paths }}
+          - path: "{{ . }}"
+            backend:
+              service:
+                name: "{{ include "fullname" $ }}"
+                port:
+                  name: {{ $portName }}
+            pathType: ImplementationSpecific
+{{- end }}
+{{- else }}
+          - path: "/"
+            backend:
+              service:
+                name: "{{ include "fullname" $ }}"
+                port:
+                  name: {{ $portName }}
+            pathType: ImplementationSpecific
+{{- end }}
+{{- else }}
+          - path: "/"
+            backend:
+              service:
+                name: "{{ include "fullname" $ }}"
+                port:
+                  name: {{ $portName }}
+            pathType: ImplementationSpecific
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  {{- include "labels" $ | indent 2 }}
+  annotations:
+    spec.ingressClassName: traefik
+    {{- if $.Values.https.enabled }}
+    cert-manager.io/cluster-issuer: ca-issuer
+    traefik.ingress.kubernetes.io/router.entrypoints: "{{ .entryPoint | default (print "websecure") }}"
+    {{- else }}
+    traefik.ingress.kubernetes.io/router.entrypoints: "{{ .entryPoint | default (print "web") }}"
+    {{- end }}
+    {{- if $middlewares }}
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ join "," $middlewares }}"
+    {{- end }}
+  name: "{{ include "fullname" $ }}-{{ .name }}-https"
+spec:
+  ingressClassName: traefik
+  rules:
+{{- if empty $hosts }}
+    - host: "{{ include "fullname" $ }}.{{ $.Release.Namespace }}.svc.cluster.local"
+      http:
+        paths:
+          - path: "/"
+            backend:
+              service:
+                name: "{{ include "fullname" $ }}"
+                port:
+                  name: {{ $portName }}
+            pathType: ImplementationSpecific
+{{- else }}
+{{- range $hosts }}
+    - host: "{{ if kindIs "map" . }}{{ .host }}{{ else }}{{ . }}{{ end }}"
+      http:
+        paths:
+{{- if kindIs "map" . }}
+{{- if .paths }}
+{{- range .paths }}
+          - path: "{{ . }}"
+            backend:
+              service:
+                name: "{{ include "fullname" $ }}"
+                port:
+                  name: {{ $portName }}
+            pathType: ImplementationSpecific
+{{- end }}
+{{- else }}
+          - path: "/"
+            backend:
+              service:
+                name: "{{ include "fullname" $ }}"
+                port:
+                  name: {{ $portName }}
+            pathType: ImplementationSpecific
+{{- end }}
+{{- else }}
+          - path: "/"
+            backend:
+              service:
+                name: "{{ include "fullname" $ }}"
+                port:
+                  name: {{ $portName }}
+            pathType: ImplementationSpecific
+{{- end }}
+{{- end }}
+{{- end }}
+  {{- if $.Values.https.enabled }}
+  tls:
+{{- if empty $.Values.ingress.hosts }}
+    - hosts:
+        - "{{ include "fullname" $ }}.{{ $.Release.Namespace }}.svc.cluster.local"
+      secretName: "{{ include "fullname" $ }}-selfsigned-tls-{{ .name }}"
+{{- else }}
+{{- range $.Values.ingress.hosts }}
+    - hosts:
+{{- if kindIs "map" . }}
+        - "{{ .host }}"
+      secretName: "{{ include "fullname" $ }}-selfsigned-tls-{{ .host | replace "." "-" }}"
+{{- else }}
+        - "{{ . }}"
+      secretName: "{{ include "fullname" $ }}-selfsigned-tls-{{ . | replace "." "-" }}"
+{{- end }}
+{{- end }}
+{{- end }}
+  {{- end }}
+{{- end -}}
+{{- end -}}
+{{- end -}}

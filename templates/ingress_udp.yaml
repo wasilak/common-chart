@@ -1,0 +1,23 @@
+{{- range $.Values.ports }}
+{{- if eq .protocol "UDP" -}}
+{{- if .nonHTTP -}}
+{{- if eq (.ingressEnabled | default "true") "true" }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteUDP
+metadata:
+  name: "{{ include "fullname" $ }}-{{ .name }}-udp"
+  {{- include "annotations" $ | indent 2 }}
+  {{- include "labels" $ | indent 2 }}
+spec:
+  entryPoints:
+    - {{ .entryPoint | default (print "udp") }}
+  routes:
+    - services:
+        - name: "{{ include "fullname" $ }}"
+          port: "{{ .name }}"
+          nativeLB: true
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

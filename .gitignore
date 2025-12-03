@@ -1,0 +1,18 @@
+# Generated files
+README.md
+artifacthub-repo.yml
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Helm generated
+*.tgz
+chart/
+charts/
+
+.spec-workflow

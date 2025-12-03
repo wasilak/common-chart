@@ -1,0 +1,6 @@
+{{- define "args" }}
+{{- if $.Values.args }}
+args: {{ range $.Values.args }}
+  - "{{- . -}}"
+{{- end -}}{{- end }}
+{{- end -}}

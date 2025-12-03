@@ -1,0 +1,10 @@
+{{- define "env_vars" }}
+{{- if $.Values.env }}
+env:
+  {{- toYaml $.Values.env | nindent 2 }}
+{{- end }}
+{{- if $.Values.envFrom }}
+envFrom:
+  {{- toYaml $.Values.envFrom | nindent 2 }}
+{{- end }}
+{{- end -}}

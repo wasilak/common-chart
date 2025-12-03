@@ -1,0 +1,318 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+## Overview
+
+The **Common Chart** is a comprehensive, production-ready Helm chart for deploying applications on Kubernetes. It provides a flexible, battle-tested foundation for deploying Deployments, StatefulSets, and DaemonSets with sensible defaults and extensive customization options.
+
+## Features
+
+- **Multiple Workload Types**: Support for Deployment, StatefulSet, and DaemonSet configurations
+- **Security First**: Pod Security Context, Container Security Context, and RBAC support
+- **Storage Management**: Persistent volumes, ConfigMaps, and EmptyDir volumes
+- **Advanced Networking**: Ingress support with domain redirect middleware for Traefik
+- **Observability**: ServiceMonitor integration for Prometheus and distributed tracing (Jaeger, Datadog)
+- **Authentication**: Forward auth with Authelia support
+- **Resource Management**: CPU/Memory limits and requests with Pod Disruption Budgets
+- **Health Checks**: Startup, Liveness, and Readiness probes
+- **Environment Configuration**: Flexible environment variables and secrets management
+- **Container Lifecycle**: Pre-stop and post-start hooks
+- **Sidecar Support**: Logging sidecars and custom sidecars
+- **HTTPS Ready**: Built-in HTTPS redirect support
+
+## Installation
+
+### Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3.0+
+- kubectl configured to access your cluster
+
+### Quick Start
+
+Add the Helm repository and install the chart:
+
+```bash
+# Add repository (when OCI publishing is complete)
+helm repo add common-chart oci://ghcr.io/wasilak/common-chart
+
+# Install the chart
+helm install my-app common-chart/common \
+  --set image.repository=my-image \
+  --set image.tag=v1.0.0
+```
+
+### Using Custom Values
+
+Create a `values.yaml` file with your custom configuration:
+
+```yaml
+image:
+  repository: my-app
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+deployment:
+  replicaCount: 3
+
+service:
+  type: LoadBalancer
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+ingress:
+  hosts:
+    - host: my-app.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+```
+
+Then install with your custom values:
+
+```bash
+helm install my-app common-chart/common -f values.yaml
+```
+
+## Configuration Examples
+
+### Enable High Availability
+
+```yaml
+deployment:
+  replicaCount: 3
+  strategy: RollingUpdate
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - my-app
+          topologyKey: kubernetes.io/hostname
+```
+
+### Enable Resource Limits
+
+```yaml
+resources:
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+```
+
+### Enable RBAC and ServiceAccount
+
+```yaml
+rbac:
+  create: true
+  rules:
+    - apiGroups: [""]
+      resources: ["pods"]
+      verbs: ["get", "list", "watch"]
+
+serviceAccount:
+  create: true
+  name: my-app
+```
+
+### Configure Storage
+
+```yaml
+storage:
+  persistence:
+    - name: data
+      enabled: true
+      size: 10Gi
+      storageClassName: fast-ssd
+      accessModes:
+        - ReadWriteOnce
+
+volumeMounts:
+  - name: data
+    mountPath: /data
+```
+
+### Enable Health Checks
+
+```yaml
+livenessProbeEnabled: true
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  failureThreshold: 3
+
+readinessProbeEnabled: true
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 3
+```
+
+## Access Instructions
+
+### ClusterIP Service (Default)
+
+For ClusterIP service access, use port-forward:
+
+```bash
+kubectl port-forward svc/my-app 8080:80
+# Access the application at http://localhost:8080
+```
+
+### NodePort Service
+
+For NodePort service access, get the node IP and port:
+
+```bash
+kubectl get svc my-app -o jsonpath='{.status.nodePort}'
+# Access at http://<node-ip>:<nodePort>
+```
+
+### LoadBalancer Service
+
+For LoadBalancer service access, get the external IP:
+
+```bash
+kubectl get svc my-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+# Access at http://<external-ip>
+```
+
+### Ingress
+
+For Ingress access, ensure the hostname is configured and accessible:
+
+```bash
+kubectl get ingress my-app
+# Access at https://my-app.example.com (or configured hostname)
+```
+
+## Upgrading
+
+To upgrade an existing release:
+
+```bash
+helm upgrade my-app common-chart/common -f values.yaml
+```
+
+## Uninstalling
+
+To uninstall the chart:
+
+```bash
+helm uninstall my-app
+```
+
+## RBAC
+
+This chart can optionally create RBAC resources (ServiceAccount, ClusterRole, ClusterRoleBinding) to grant the application necessary permissions.
+
+To enable RBAC:
+
+```yaml
+rbac:
+  create: true
+  rules:
+    - apiGroups: [""]
+      resources: ["pods", "services"]
+      verbs: ["get", "list", "watch"]
+```
+
+## Troubleshooting
+
+### Pod not starting
+
+Check pod status and logs:
+
+```bash
+kubectl get pods -l app=my-app
+kubectl logs -f deployment/my-app
+kubectl describe pod <pod-name>
+```
+
+### Service not accessible
+
+Verify service configuration:
+
+```bash
+kubectl get svc my-app
+kubectl get endpoints my-app
+```
+
+### Health check failures
+
+Check probe configuration and application logs:
+
+```bash
+kubectl logs -f deployment/my-app
+kubectl describe pod <pod-name>
+```
+
+### Image pull errors
+
+Verify image repository and pull secrets:
+
+```yaml
+image:
+  repository: your-registry/image
+  pullSecrets:
+    - name: registry-credentials
+```
+
+### Persistent volume issues
+
+Check PVC and storage class:
+
+```bash
+kubectl get pvc
+kubectl get storageclass
+kubectl describe pvc <pvc-name>
+```
+
+## Support
+
+For issues, feature requests, or questions:
+
+- **GitHub Issues**: [wasilak/common-chart](https://github.com/wasilak/common-chart/issues)
+- **GitHub Discussions**: [wasilak/common-chart](https://github.com/wasilak/common-chart/discussions)
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+## Chart Values
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

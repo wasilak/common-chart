@@ -1,0 +1,39 @@
+{{ if and (.Values.serviceMonitor) (.Values.serviceMonitor.enabled)  }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ $.Values.serviceMonitor.namespace | default .Release.Namespace }}
+  {{- include "annotations" $ | indent 2 }}
+  {{- include "labels" $ | indent 2 }}
+spec:
+  selector:
+    matchLabels:
+      app: "{{ include "fullname" $ }}"
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+  {{- range $.Values.ports }}{{- if .scrape }} {{- if .scrape.enabled }}
+    - port: {{ .name }}
+      interval: {{ .scrape.interval | default "30s" }}
+      {{- if .scrape.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml .scrape.metricRelabelings | nindent 8 }}
+      {{- end -}}
+      {{- if .scrape.relabelings }}
+      relabelings:
+        {{- toYaml .scrape.relabelings | nindent 8 }}
+      {{- end -}}
+      {{- if .scrape.path }}
+      path: {{ .scrape.path }}
+      {{- end -}}
+      {{- if .scrape.bearerTokenSecret }}
+      bearerTokenSecret:
+        {{- toYaml .scrape.bearerTokenSecret | nindent 8 }}
+      {{- end -}}
+      {{- end -}}
+      {{- end -}}
+  {{- end }}
+{{- end -}}

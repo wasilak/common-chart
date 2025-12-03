@@ -1,0 +1,241 @@
+# Default values for go-hello-world-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+type: deployment # possible values: deployment, statefulset, daemonset
+
+deployment:
+  replicaCount: 1
+  strategy: "RollingUpdate" # "Recreate"
+
+statefulset:
+  replicaCount: 1
+  podManagementPolicy: "OrderedReady"
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+  volumeClaimTemplates: []
+
+daemonset:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+
+# Domain redirect rules for traefik middleware
+# Maps from one domain to another (independent of ingress.hosts)
+domainRedirect: []
+
+# Custom subdomain prefix used in domainRedirect rules
+customSubdomain: ""
+
+labels: {}
+podLabels: {}
+
+annotations: {}
+podAnnotations: {}
+
+nodeSelector: {}
+tolerations: {}
+affinity: {}
+
+resources: {}
+  # Example with limits:
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 250m
+  #   memory: 256Mi
+
+env: []
+  # - name: VAR_NAME
+  #   value: "value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
+  # - name: FIELD_VAR
+  #   valueFrom:
+  #     fieldRef:
+  #       fieldPath: metadata.name
+
+envFrom: []
+
+storage:
+  # Storage for Deployments (single PVC per pod)
+  persistence: []
+    # - name: data
+    #   enabled: true
+    #   size: 10Gi
+    #   storageClassName: default
+    #   accessModes:
+    #     - ReadWriteOnce
+
+volumeMounts: []
+volumes:
+  emptyDir: []
+  hostPath: []
+  configMap: []
+
+initContainers: []
+
+lifecycle:
+  preStop: {}
+  postStart: {}
+
+sidecars: []
+configMaps: []
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: null
+  maxUnavailable: 1
+
+rbac:
+  create: false
+  rules: []
+
+hostNetwork: false
+
+enableServiceLinks: true
+
+dnsPolicy: ClusterFirst
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 3000
+  fsGroup: 2000
+  fsGroupChangePolicy: OnRootMismatch
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  privileged: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 3000
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+image:
+  registry: docker.io
+  repository: ""
+  pullPolicy: IfNotPresent
+  tag: ""
+  digest: ""
+  pullSecrets: []
+    # - name: my-registry-secret
+
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
+
+service:
+  type: ClusterIP
+  externalTrafficPolicy: Cluster
+
+ports:
+  - name: http
+    containerPort: 2000
+    servicePort: 2000
+    protocol: TCP
+    ingressEnabled: true
+    scrape:
+      enabled: false
+      path: /metrics
+      # metricRelabelings:
+      #   - action: replace
+      #     regex: (.*)
+      #     replacement: ${1}
+      #     sourceLabels:
+      #       - service_instance_id
+      #     targetLabel: instance
+
+command: []
+args: []
+
+ingress:
+  hosts: []
+
+startupProbeEnabled: false
+startupProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 1
+  failureThreshold: 30
+  successThreshold: 1
+
+livenessProbeEnabled: true
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbeEnabled: true
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 3
+  successThreshold: 1
+
+auth:
+  enabled: false
+  type: forwardauth-authelia
+  oidc:
+    secretName: external-secret
+    # clientId: "urn:k8s:secret:tools:OIDC_PLUGIN_CLIENT_ID"
+    # clientSecret: "urn:k8s:secret:tools:OIDC_PLUGIN_CLIENT_SECRET"
+    # secret: "urn:k8s:secret:tools:OIDC_PLUGIN_SECRET"
+  url: http://authelia-otteryak-foo.kube-system.svc.cluster.local:9091/api/authz/forward-auth
+
+https:
+  enabled: true
+  redirect: true
+
+externalSecret:
+  enabled: false
+
+serviceMonitor:
+  enabled: false
+  namespace: observability
+
+tracing:
+  enabled: false
+  jaeger:
+    agentHost: jaeger-agent.observability.svc.cluster.local
+    agentPort: 6831
+  datadog:
+    enabled: false
+    agentHost: datadog-agent.datadog.svc.cluster.local
+    agentPort: 8126
+
+logging:
+  sidecars: []
+    # - name: fluent-bit
+    #   image: fluent/fluent-bit:latest
+    #   resources:
+    #     limits:
+    #       cpu: 100m
+    #       memory: 128Mi
+    #     requests:
+    #       cpu: 50m
+    #       memory: 64Mi

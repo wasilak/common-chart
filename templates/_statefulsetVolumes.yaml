@@ -1,0 +1,35 @@
+{{- define "statefulsetVolumes" }}
+{{- if or $.Values.configMaps $.Values.volumes.emptyDir $.Values.volumes.hostPath $.Values.volumes.configMap }}
+volumes:
+  {{- range $.Values.volumes.emptyDir }}
+  - name: "{{ .name }}"
+    emptyDir:
+      {{- if .sizeLimit }}
+      sizeLimit: {{ .sizeLimit }}
+      {{- end }}
+  {{- end }}
+  {{- range $.Values.volumes.hostPath }}
+  - name: "{{ .name }}"
+    hostPath:
+      path: {{ .path | quote }}
+      {{- if .type }}
+      type: {{ .type }}
+      {{- end }}
+  {{- end }}
+  {{- range $.Values.volumes.configMap }}
+  - name: "{{ .name }}"
+    configMap:
+      name: {{ .configMapName | default .name }}
+      {{- if .items }}
+      items:
+        {{- toYaml .items | nindent 8 }}
+      {{- end }}
+      defaultMode: {{ .defaultMode | default "0644" }}
+  {{- end }}
+  {{- range $.Values.configMaps }}
+  - name: "{{ .name | default (include "fullname" $) }}"
+    configMap:
+      name: "{{ .name | default (include "fullname" $) }}"
+  {{- end }}
+{{- end }}
+{{- end -}}

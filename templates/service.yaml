@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ include "fullname" $ }}"
+  {{- include "annotations" $ | indent 2 }}
+  {{- include "labels" $ | indent 2 }}
+spec:
+  selector:
+    app: "{{ include "fullname" $ }}"
+  type: "{{ $.Values.service.type }}"
+  {{- if eq (.Values.service.type) "LoadBalancer" }}
+  externalTrafficPolicy: "{{ $.Values.service.externalTrafficPolicy }}"
+  {{- end }}
+  ports:
+  {{- range $.Values.ports }}
+    - protocol: "{{ .protocol | default "TCP" }}"
+      port: {{ .servicePort | default .containerPort }}
+      targetPort: {{ .containerPort }}
+      name: {{ .name }}
+  {{- end }}

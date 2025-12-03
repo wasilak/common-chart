@@ -1,0 +1,55 @@
+{{- if eq (.Values.type) "daemonset" -}}
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: "{{ include "fullname" $ }}"
+  {{- include "annotations" $ | indent 2 }}
+  {{- include "labels" $ | indent 2 }}
+spec:
+  selector:
+    matchLabels:
+      app: "{{ include "fullname" $ }}"
+  {{- if $.Values.daemonset.updateStrategy }}
+  updateStrategy:
+    {{- toYaml $.Values.daemonset.updateStrategy | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      {{- include "podAnnotations" $  | indent 6 }}
+      {{- include "podLabels" $ | indent 6 }}
+    spec:
+      {{- include "podSpec" $ | indent 6 }}
+
+      {{- include "deploymentVolumes" $ | indent 6 }}
+
+      {{- if $.Values.initContainers }}
+      initContainers:
+        {{- toYaml $.Values.initContainers | nindent 8 }}
+      {{- end }}
+
+      containers:
+        {{- include "container" $ | indent 8 }}
+
+        {{- range $.Values.sidecars }}
+        - name: "{{ .name }}"
+          image: "{{ .image.registry | default $.Values.image.registry }}/{{ .image.repository }}{{ if .image.digest }}@{{ .image.digest }}{{ else }}:{{ .image.tag }}{{ end }}"
+          imagePullPolicy: "{{ .image.pullPolicy | default $.Values.image.pullPolicy }}"
+          {{- if .securityContext }}
+          securityContext:
+            {{- toYaml .securityContext | nindent 12 }}
+          {{- end }}
+          {{- if .env }}
+          env:
+            {{- toYaml .env | nindent 12 }}
+          {{- end }}
+          {{- if .volumeMounts }}
+          volumeMounts:
+            {{- toYaml .volumeMounts | nindent 12 }}
+          {{- end }}
+          {{- if .resources }}
+          resources:
+            {{- toYaml .resources | nindent 12 }}
+          {{- end }}
+        {{- end }}
+{{- end -}}

@@ -1,0 +1,17 @@
+{{- range $.Values.configMaps }}
+{{- if not .isExternal }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .name | default (include "fullname" $) }}"
+  {{- include "annotations" $ | indent 2 }}
+  {{- include "labels" $ | indent 2 }}
+immutable: {{ .immutable | default false }}
+data:
+  {{- range .files }}
+  "{{ .filename }}": |
+    {{- .content | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,25 @@
+{{- define "volumeMounts" }}
+{{- if or $.Values.volumeMounts $.Values.configMaps }}
+volumeMounts:
+  {{- range $.Values.volumeMounts }}
+  - name: "{{ .name | default (include "fullname" $) }}"
+    mountPath: "{{ .mountPath }}"
+    {{- if .subPath }}
+    subPath: "{{ .subPath }}"
+    {{- end }}
+    {{- if .readOnly }}
+    readOnly: {{ .readOnly }}
+    {{- end }}
+  {{- end }}
+  {{- range $.Values.configMaps }}
+  {{- range .files }}
+  - name: "{{ $.name }}"
+    mountPath: "{{ .mountPath }}"
+    {{- if .subPath }}
+    subPath: "{{ .subPath }}"
+    {{- end }}
+    readOnly: true
+  {{- end }}
+  {{- end }}
+{{- end }}
+{{- end -}}

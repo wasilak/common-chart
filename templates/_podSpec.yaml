@@ -1,0 +1,24 @@
+{{- define "podSpec" }}
+automountServiceAccountToken: {{ $.Values.serviceAccount.create | default false }}
+{{- if $.Values.serviceAccount.name }}
+serviceAccountName: "{{ $.Values.serviceAccount.name }}"
+{{- else if $.Values.serviceAccount.create }}
+serviceAccountName: "{{ include "fullname" $ }}"
+{{- end }}
+enableServiceLinks: {{ $.Values.enableServiceLinks }}
+dnsPolicy: {{ $.Values.dnsPolicy | default "ClusterFirst" }}
+{{- if $.Values.image.pullSecrets }}
+imagePullSecrets:
+  {{- toYaml $.Values.image.pullSecrets | nindent 2 }}
+{{- end }}
+{{- include "nodeSelector" $ | indent 0 }}
+{{- include "tolerations" $ | indent 0 }}
+{{- include "affinity" $ | indent 0 }}
+{{- if $.Values.hostNetwork }}
+hostNetwork: {{ $.Values.hostNetwork }}
+{{- end }}
+{{- if .Values.podSecurityContext }}
+securityContext:
+  {{- toYaml .Values.podSecurityContext | nindent 2 }}
+{{- end }}
+{{- end }}

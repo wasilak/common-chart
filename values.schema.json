@@ -1,0 +1,705 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Common Chart Values",
+  "description": "Configuration schema for the common Helm chart - a comprehensive, production-ready chart for deploying applications on Kubernetes",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Kubernetes workload type",
+      "enum": ["deployment", "statefulset", "daemonset"],
+      "default": "deployment"
+    },
+    "deployment": {
+      "type": "object",
+      "description": "Deployment-specific configuration",
+      "properties": {
+        "replicaCount": {
+          "type": "integer",
+          "description": "Number of replicas for the deployment",
+          "default": 1,
+          "minimum": 1
+        },
+        "strategy": {
+          "type": "string",
+          "description": "Deployment strategy type",
+          "enum": ["RollingUpdate", "Recreate"],
+          "default": "RollingUpdate"
+        }
+      },
+      "additionalProperties": false
+    },
+    "statefulset": {
+      "type": "object",
+      "description": "StatefulSet-specific configuration",
+      "properties": {
+        "replicaCount": {
+          "type": "integer",
+          "description": "Number of replicas for the StatefulSet",
+          "default": 1,
+          "minimum": 1
+        },
+        "podManagementPolicy": {
+          "type": "string",
+          "description": "Pod management policy for StatefulSet",
+          "enum": ["OrderedReady", "Parallel"],
+          "default": "OrderedReady"
+        },
+        "updateStrategy": {
+          "type": "object",
+          "description": "StatefulSet update strategy",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["RollingUpdate", "OnDelete"]
+            },
+            "rollingUpdate": {
+              "type": "object",
+              "properties": {
+                "partition": {
+                  "type": "integer",
+                  "default": 0
+                }
+              }
+            }
+          }
+        },
+        "volumeClaimTemplates": {
+          "type": "array",
+          "description": "Volume claim templates for StatefulSet",
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    },
+    "daemonset": {
+      "type": "object",
+      "description": "DaemonSet-specific configuration",
+      "properties": {
+        "updateStrategy": {
+          "type": "object",
+          "description": "DaemonSet update strategy",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["RollingUpdate", "OnDelete"]
+            },
+            "rollingUpdate": {
+              "type": "object",
+              "properties": {
+                "maxUnavailable": {
+                  "type": "integer",
+                  "default": 1
+                }
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "domainRedirect": {
+      "type": "array",
+      "description": "Domain redirect rules for traefik middleware",
+      "default": []
+    },
+    "customSubdomain": {
+      "type": "string",
+      "description": "Custom subdomain prefix used in domainRedirect rules",
+      "default": ""
+    },
+    "labels": {
+      "type": "object",
+      "description": "Kubernetes labels to apply to all resources",
+      "default": {}
+    },
+    "podLabels": {
+      "type": "object",
+      "description": "Kubernetes labels to apply to pods",
+      "default": {}
+    },
+    "annotations": {
+      "type": "object",
+      "description": "Kubernetes annotations to apply to all resources",
+      "default": {}
+    },
+    "podAnnotations": {
+      "type": "object",
+      "description": "Kubernetes annotations to apply to pods",
+      "default": {}
+    },
+    "nodeSelector": {
+      "type": "object",
+      "description": "Node selector for pod scheduling",
+      "default": {}
+    },
+    "tolerations": {
+      "type": "array",
+      "description": "Tolerations for pod scheduling",
+      "default": []
+    },
+    "affinity": {
+      "type": "object",
+      "description": "Pod affinity rules",
+      "default": {}
+    },
+    "resources": {
+      "type": "object",
+      "description": "Resource requests and limits",
+      "properties": {
+        "limits": {
+          "type": "object",
+          "description": "Resource limits",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "description": "CPU limit (e.g., 500m, 1)"
+            },
+            "memory": {
+              "type": "string",
+              "description": "Memory limit (e.g., 512Mi, 1Gi)"
+            }
+          }
+        },
+        "requests": {
+          "type": "object",
+          "description": "Resource requests",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "description": "CPU request (e.g., 250m, 500m)"
+            },
+            "memory": {
+              "type": "string",
+              "description": "Memory request (e.g., 256Mi, 512Mi)"
+            }
+          }
+        }
+      },
+      "default": {}
+    },
+    "env": {
+      "type": "array",
+      "description": "Environment variables for the container",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    },
+    "envFrom": {
+      "type": "array",
+      "description": "Environment variables from ConfigMaps or Secrets",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    },
+    "storage": {
+      "type": "object",
+      "description": "Storage configuration",
+      "properties": {
+        "persistence": {
+          "type": "array",
+          "description": "Persistent volume configuration for deployments",
+          "default": [],
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the persistent volume"
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable persistent volume"
+              },
+              "size": {
+                "type": "string",
+                "description": "Size of the persistent volume (e.g., 10Gi)"
+              },
+              "storageClassName": {
+                "type": "string",
+                "description": "Storage class name"
+              },
+              "accessModes": {
+                "type": "array",
+                "description": "Access modes for the persistent volume",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "volumeMounts": {
+      "type": "array",
+      "description": "Volume mounts for the container",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    },
+    "volumes": {
+      "type": "object",
+      "description": "Volume definitions",
+      "properties": {
+        "emptyDir": {
+          "type": "array",
+          "description": "EmptyDir volumes",
+          "default": []
+        },
+        "hostPath": {
+          "type": "array",
+          "description": "HostPath volumes",
+          "default": []
+        },
+        "configMap": {
+          "type": "array",
+          "description": "ConfigMap volumes",
+          "default": []
+        }
+      }
+    },
+    "initContainers": {
+      "type": "array",
+      "description": "Init containers for the pod",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "description": "Container lifecycle hooks",
+      "properties": {
+        "preStop": {
+          "type": "object",
+          "description": "Pre-stop lifecycle hook"
+        },
+        "postStart": {
+          "type": "object",
+          "description": "Post-start lifecycle hook"
+        }
+      }
+    },
+    "sidecars": {
+      "type": "array",
+      "description": "Sidecar containers",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    },
+    "configMaps": {
+      "type": "array",
+      "description": "ConfigMaps to create",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    },
+    "podDisruptionBudget": {
+      "type": "object",
+      "description": "Pod Disruption Budget configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable Pod Disruption Budget",
+          "default": false
+        },
+        "minAvailable": {
+          "type": ["integer", "null"],
+          "description": "Minimum number of pods that must be available"
+        },
+        "maxUnavailable": {
+          "type": "integer",
+          "description": "Maximum number of pods that can be unavailable",
+          "default": 1
+        }
+      }
+    },
+    "rbac": {
+      "type": "object",
+      "description": "RBAC configuration",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "description": "Create RBAC resources",
+          "default": false
+        },
+        "rules": {
+          "type": "array",
+          "description": "RBAC rules",
+          "default": []
+        }
+      }
+    },
+    "hostNetwork": {
+      "type": "boolean",
+      "description": "Use host network for the pod",
+      "default": false
+    },
+    "enableServiceLinks": {
+      "type": "boolean",
+      "description": "Enable service links in the container",
+      "default": true
+    },
+    "dnsPolicy": {
+      "type": "string",
+      "description": "DNS policy for the pod",
+      "enum": ["ClusterFirst", "ClusterFirstWithHostNet", "Default", "None"],
+      "default": "ClusterFirst"
+    },
+    "podSecurityContext": {
+      "type": "object",
+      "description": "Security context for the pod",
+      "properties": {
+        "runAsUser": {
+          "type": "integer",
+          "description": "User ID to run the pod as",
+          "default": 1000
+        },
+        "runAsGroup": {
+          "type": "integer",
+          "description": "Group ID to run the pod as",
+          "default": 3000
+        },
+        "fsGroup": {
+          "type": "integer",
+          "description": "File system group ID",
+          "default": 2000
+        },
+        "fsGroupChangePolicy": {
+          "type": "string",
+          "description": "File system group change policy",
+          "enum": ["OnRootMismatch", "Always"],
+          "default": "OnRootMismatch"
+        }
+      }
+    },
+    "containerSecurityContext": {
+      "type": "object",
+      "description": "Security context for the container",
+      "properties": {
+        "allowPrivilegeEscalation": {
+          "type": "boolean",
+          "description": "Allow privilege escalation",
+          "default": false
+        },
+        "readOnlyRootFilesystem": {
+          "type": "boolean",
+          "description": "Mount root filesystem as read-only",
+          "default": true
+        },
+        "privileged": {
+          "type": "boolean",
+          "description": "Run container in privileged mode",
+          "default": false
+        },
+        "runAsNonRoot": {
+          "type": "boolean",
+          "description": "Run container as non-root user",
+          "default": true
+        },
+        "runAsUser": {
+          "type": "integer",
+          "description": "User ID to run the container as",
+          "default": 1000
+        },
+        "runAsGroup": {
+          "type": "integer",
+          "description": "Group ID to run the container as",
+          "default": 3000
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Linux capabilities"
+        },
+        "seccompProfile": {
+          "type": "object",
+          "description": "Seccomp profile configuration",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Seccomp profile type",
+              "enum": ["RuntimeDefault", "Localhost", "Unconfined"]
+            }
+          }
+        }
+      }
+    },
+    "image": {
+      "type": "object",
+      "description": "Container image configuration",
+      "properties": {
+        "registry": {
+          "type": "string",
+          "description": "Image registry",
+          "default": "docker.io"
+        },
+        "repository": {
+          "type": "string",
+          "description": "Image repository"
+        },
+        "pullPolicy": {
+          "type": "string",
+          "description": "Image pull policy",
+          "enum": ["Always", "IfNotPresent", "Never"],
+          "default": "IfNotPresent"
+        },
+        "tag": {
+          "type": "string",
+          "description": "Image tag"
+        },
+        "digest": {
+          "type": "string",
+          "description": "Image digest for reproducible pulls"
+        },
+        "pullSecrets": {
+          "type": "array",
+          "description": "Image pull secrets",
+          "default": []
+        }
+      },
+      "required": ["registry"]
+    },
+    "serviceAccount": {
+      "type": "object",
+      "description": "ServiceAccount configuration",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "description": "Create a ServiceAccount",
+          "default": false
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the ServiceAccount"
+        },
+        "annotations": {
+          "type": "object",
+          "description": "ServiceAccount annotations",
+          "default": {}
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "description": "Kubernetes Service configuration",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Service type",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"],
+          "default": "ClusterIP"
+        },
+        "externalTrafficPolicy": {
+          "type": "string",
+          "description": "External traffic policy",
+          "enum": ["Cluster", "Local"],
+          "default": "Cluster"
+        }
+      }
+    },
+    "ports": {
+      "type": "array",
+      "description": "Container ports",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Port name"
+          },
+          "containerPort": {
+            "type": "integer",
+            "description": "Container port number"
+          },
+          "servicePort": {
+            "type": "integer",
+            "description": "Service port number"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Protocol (TCP, UDP, etc.)",
+            "default": "TCP"
+          },
+          "ingressEnabled": {
+            "type": "boolean",
+            "description": "Enable ingress for this port",
+            "default": false
+          },
+          "scrape": {
+            "type": "object",
+            "description": "Prometheus scrape configuration",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "default": false
+              },
+              "path": {
+                "type": "string",
+                "description": "Metrics path"
+              }
+            }
+          }
+        }
+      }
+    },
+    "command": {
+      "type": "array",
+      "description": "Container command",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "args": {
+      "type": "array",
+      "description": "Container arguments",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "description": "Ingress configuration",
+      "properties": {
+        "hosts": {
+          "type": "array",
+          "description": "Ingress hosts",
+          "default": []
+        }
+      }
+    },
+    "startupProbeEnabled": {
+      "type": "boolean",
+      "description": "Enable startup probe",
+      "default": false
+    },
+    "startupProbe": {
+      "type": "object",
+      "description": "Startup probe configuration"
+    },
+    "livenessProbeEnabled": {
+      "type": "boolean",
+      "description": "Enable liveness probe",
+      "default": true
+    },
+    "livenessProbe": {
+      "type": "object",
+      "description": "Liveness probe configuration"
+    },
+    "readinessProbeEnabled": {
+      "type": "boolean",
+      "description": "Enable readiness probe",
+      "default": true
+    },
+    "readinessProbe": {
+      "type": "object",
+      "description": "Readiness probe configuration"
+    },
+    "auth": {
+      "type": "object",
+      "description": "Authentication configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable authentication",
+          "default": false
+        },
+        "type": {
+          "type": "string",
+          "description": "Authentication type",
+          "enum": ["forwardauth-authelia"],
+          "default": "forwardauth-authelia"
+        },
+        "oidc": {
+          "type": "object",
+          "description": "OIDC configuration"
+        },
+        "url": {
+          "type": "string",
+          "description": "Authentication service URL"
+        }
+      }
+    },
+    "https": {
+      "type": "object",
+      "description": "HTTPS configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable HTTPS",
+          "default": true
+        },
+        "redirect": {
+          "type": "boolean",
+          "description": "Redirect HTTP to HTTPS",
+          "default": true
+        }
+      }
+    },
+    "externalSecret": {
+      "type": "object",
+      "description": "External Secret configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable external secrets",
+          "default": false
+        }
+      }
+    },
+    "serviceMonitor": {
+      "type": "object",
+      "description": "Prometheus ServiceMonitor configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable ServiceMonitor",
+          "default": false
+        },
+        "namespace": {
+          "type": "string",
+          "description": "Namespace for ServiceMonitor",
+          "default": "observability"
+        }
+      }
+    },
+    "tracing": {
+      "type": "object",
+      "description": "Distributed tracing configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable tracing",
+          "default": false
+        },
+        "jaeger": {
+          "type": "object",
+          "description": "Jaeger configuration"
+        },
+        "datadog": {
+          "type": "object",
+          "description": "Datadog configuration"
+        }
+      }
+    },
+    "logging": {
+      "type": "object",
+      "description": "Logging configuration",
+      "properties": {
+        "sidecars": {
+          "type": "array",
+          "description": "Logging sidecars",
+          "default": []
+        }
+      }
+    }
+  },
+  "required": ["type", "image"]
+}

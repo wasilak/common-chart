@@ -1,0 +1,8 @@
+{{- define "podAnnotations" }}
+annotations:
+{{- if $.Values.podAnnotations -}}
+  {{- range $key, $value := $.Values.podAnnotations }}
+  "{{ $key }}": "{{ $value }}"
+  {{- end -}}
+{{- end }}
+{{- end -}}

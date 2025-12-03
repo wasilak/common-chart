@@ -1,0 +1,6 @@
+{{- define "affinity" }}
+{{- with $.Values.affinity }}
+affinity:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,24 @@
+{{- if eq (.Values.type) "deployment" -}}
+{{- if $.Values.storage.persistence }}
+{{- range $.Values.storage.persistence }}
+{{- if .enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ .name | default (include "fullname" $) }}"
+  {{- include "annotations" $ | indent 2 }}
+  {{- include "labels" $ | indent 2 }}
+spec:
+  accessModes:
+    {{- toYaml (.accessModes | default (list "ReadWriteOnce")) | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .size | default "10Gi" }}
+  {{- if .storageClassName }}
+  storageClassName: {{ .storageClassName }}
+  {{- end }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

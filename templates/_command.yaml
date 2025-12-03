@@ -1,0 +1,6 @@
+{{- define "command" }}
+{{- if $.Values.command }}
+command: {{ range $.Values.command }}
+  - "{{- . -}}"
+{{- end -}}{{- end }}
+{{- end -}}

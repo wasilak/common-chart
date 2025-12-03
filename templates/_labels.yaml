@@ -1,0 +1,14 @@
+{{- define "labels" }}
+labels:
+  app: "{{ include "fullname" $ }}"
+  app.kubernetes.io/name: "{{ include "fullname" $ }}"
+  helm.sh/chart: "common-{{ .Chart.Version }}"
+  app.kubernetes.io/instance: "{{ .Release.Name }}"
+  app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+  app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+{{- if $.Values.labels -}}
+  {{- range $key, $value := $.Values.labels }}
+  "{{ $key }}": "{{ $value }}"
+  {{- end -}}
+{{- end }}
+{{- end -}}

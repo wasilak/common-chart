@@ -1,0 +1,37 @@
+{{- define "volumeClaimTemplates" }}
+{{- if or $.Values.statefulset.volumeClaimTemplates $.Values.storage.persistence }}
+volumeClaimTemplates:
+  {{- range $.Values.statefulset.volumeClaimTemplates }}
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: "{{ .name }}"
+    spec:
+      accessModes:
+        {{- toYaml (.accessModes | default (list "ReadWriteOnce")) | nindent 8 }}
+      {{- if .storageClassName }}
+      storageClassName: {{ .storageClassName }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .size | default "10Gi" }}
+  {{- end }}
+  {{- range $.Values.storage.persistence }}
+  {{- if and .enabled (eq $.Values.type "statefulset") }}
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: "{{ .name }}"
+    spec:
+      accessModes:
+        {{- toYaml (.accessModes | default (list "ReadWriteOnce")) | nindent 8 }}
+      {{- if .storageClassName }}
+      storageClassName: {{ .storageClassName }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .size | default "10Gi" }}
+  {{- end }}
+  {{- end }}
+{{- end }}
+{{- end -}}

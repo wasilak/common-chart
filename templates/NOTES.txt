@@ -1,0 +1,121 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║  {{ .Chart.Name | upper }} ({{ .Chart.Version }}) has been deployed!         ║
+║                                                                            ║
+║  Release Name: {{ .Release.Name }}
+║  Namespace: {{ .Release.Namespace }}
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+{{ if eq .Values.service.type "ClusterIP" -}}
+⚙️  SERVICE ACCESS (ClusterIP)
+
+  Since you're using a ClusterIP service, you'll need to use port-forward to access
+  the application from outside the cluster:
+
+    kubectl port-forward svc/{{ .Release.Name }} 8080:{{ (index .Values.ports 0).servicePort }} -n {{ .Release.Namespace }}
+
+  Then access the application at:
+    http://localhost:8080
+
+{{ else if eq .Values.service.type "NodePort" -}}
+⚙️  SERVICE ACCESS (NodePort)
+
+  Your service has been exposed on a NodePort. Get the external IP of any node:
+
+    NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="ExternalIP")].address}')
+    NODE_PORT=$(kubectl get svc {{ .Release.Name }} -o jsonpath='{.spec.ports[0].nodePort}' -n {{ .Release.Namespace }})
+
+  Access the application at:
+    http://$NODE_IP:$NODE_PORT
+
+  Or if nodes don't have external IPs, use port-forward instead.
+
+{{ else if eq .Values.service.type "LoadBalancer" -}}
+⚙️  SERVICE ACCESS (LoadBalancer)
+
+  Your service has been exposed as a LoadBalancer. Watch for the external IP:
+
+    kubectl get svc {{ .Release.Name }} -w -n {{ .Release.Namespace }}
+
+  Once the EXTERNAL-IP shows an IP address (not pending), access the application at:
+    http://<EXTERNAL-IP>
+
+  This may take a few minutes depending on your cloud provider.
+
+{{ else if eq .Values.service.type "ExternalName" -}}
+⚙️  SERVICE ACCESS (ExternalName)
+
+  Your service is configured as ExternalName pointing to an external service.
+  Access it using the configured external name.
+
+{{ end -}}
+
+{{ if .Values.ingress.hosts -}}
+⚙️  INGRESS ACCESS
+
+  Ingress is enabled with the following hosts:
+{{ range .Values.ingress.hosts }}
+    - {{ .host }}
+{{ end }}
+
+  Make sure your ingress controller is running and DNS is configured for these hostnames.
+  Then access the application at:
+    https://{{ (index .Values.ingress.hosts 0).host }}
+
+{{ end -}}
+
+🔍 VERIFICATION COMMANDS
+
+  Check pod status:
+    kubectl get pods -l app={{ .Release.Name }} -n {{ .Release.Namespace }}
+
+  Check pod details:
+    kubectl describe pod -l app={{ .Release.Name }} -n {{ .Release.Namespace }}
+
+  View pod logs:
+    kubectl logs -f deployment/{{ .Release.Name }} -n {{ .Release.Namespace }}
+
+  Check service status:
+    kubectl get svc {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+  Check service endpoints:
+    kubectl get endpoints {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+⚠️  TROUBLESHOOTING
+
+  If the pod is not starting:
+    1. Check pod status: kubectl describe pod -l app={{ .Release.Name }}
+    2. Check logs: kubectl logs deployment/{{ .Release.Name }}
+    3. Verify image exists and is accessible
+    4. Check resource requests don't exceed node capacity
+
+  If the service is not accessible:
+    1. Verify the pod is running and ready
+    2. Check service configuration: kubectl get svc {{ .Release.Name }}
+    3. Check endpoints: kubectl get endpoints {{ .Release.Name }}
+    4. Verify your firewall/security groups allow traffic
+
+  If health checks are failing:
+    1. Check pod logs for errors
+    2. Verify health check endpoints are correct
+    3. Increase initialDelaySeconds if needed
+
+📖 NEXT STEPS
+
+  1. Monitor the deployment:
+    kubectl get deployment {{ .Release.Name }} -w -n {{ .Release.Namespace }}
+
+  2. Once the deployment is ready, access the application using the instructions above
+
+  3. Check the application logs for any errors:
+    kubectl logs -f deployment/{{ .Release.Name }} -n {{ .Release.Namespace }}
+
+  4. Update application configuration by modifying values:
+    helm upgrade {{ .Release.Name }} <chart> -f values.yaml
+
+🔗 SUPPORT & DOCUMENTATION
+
+  Chart Repository: https://github.com/wasilak/common-chart
+  Issues: https://github.com/wasilak/common-chart/issues
+  Documentation: See README.md in the chart repository

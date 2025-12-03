@@ -1,0 +1,15 @@
+{{- if $.Values.domainRedirect -}}
+{{- range $.Values.domainRedirect }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: "redirect-{{ include "fullname" $ }}-{{ .from | replace "." "-" }}-{{ .to | replace "." "-" }}"
+  {{- include "annotations" $ | indent 2 }}
+  {{- include "labels" $ | indent 2 }}
+spec:
+  redirectRegex:
+    regex: "^(https?)://{{ $.Values.customSubdomain | default (include "fullname" $) }}\\.{{ .from | replace "." "\\\\." }}(/?.*)"
+    replacement: "${1}://{{ $.Values.customSubdomain | default (include "fullname" $) }}.{{ .to }}${2}"
+{{- end -}}
+{{- end -}}

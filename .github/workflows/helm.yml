@@ -1,0 +1,81 @@
+name: Helm Chart
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+    paths-ignore:
+      - ".github/workflows/**"
+      - "docs-site/**"
+
+  workflow_dispatch:
+
+env:
+  HELM_REGISTRY: ghcr.io
+  HELM_NAMESPACE: ${{ github.repository_owner }}
+
+jobs:
+  publish-helm-chart:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]' }}
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: "latest"
+
+      - name: Setup ORAS
+        uses: oras-project/setup-oras@v1
+
+      - name: Log into Helm registry
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ env.HELM_REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+      - name: Log into OCI registry for ORAS
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | oras login ${{ env.HELM_REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "version_full=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Package and push Helm chart to OCI registry
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          # Update version and appVersion in Chart.yaml temporarily for this build
+          sed -i "s/version: .*/version: $VERSION/" Chart.yaml
+          sed -i "s/appVersion: .*/appVersion: \"$VERSION\"/" Chart.yaml
+          # Keep chart name as "common" (already defined in Chart.yaml)
+          # Package the chart
+          helm package . --destination /tmp
+          # Push to OCI registry using the chart name from Chart.yaml
+          CHART_FILE=$(ls /tmp/common-${VERSION}.tgz | head -n 1)
+          helm push "$CHART_FILE" "oci://${{ env.HELM_REGISTRY }}/${{ env.HELM_NAMESPACE }}"
+
+      - name: Push Artifact Hub metadata to OCI registry
+        run: |
+          # Push artifacthub-repo.yml as a separate OCI artifact with the special tag
+          oras push \
+            ${{ env.HELM_REGISTRY }}/${{ env.HELM_NAMESPACE }}/common:artifacthub.io \
+            --config /dev/null:application/vnd.cncf.artifacthub.config.v1+yaml \
+            artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml
+
+      - name: Verify publication
+        run: |
+          echo "✓ Chart published successfully!"
+          echo "Registry: ${{ env.HELM_REGISTRY }}/${{ env.HELM_NAMESPACE }}"
+          echo "Chart: common"
+          echo "Version: ${{ steps.version.outputs.version }}"
+          echo "OCI URL: oci://${{ env.HELM_REGISTRY }}/${{ env.HELM_NAMESPACE }}/common:${{ steps.version.outputs.version_full }}"
