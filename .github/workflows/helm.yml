@@ -64,7 +64,7 @@ jobs:
 
           # Push to OCI registry using the chart name from Chart.yaml
           CHART_FILE=$(ls /tmp/common-${VERSION}.tgz | head -n 1)
-          helm push "$CHART_FILE" "oci://${{ env.HELM_REGISTRY }}/${{ env.HELM_NAMESPACE }}"
+          helm push "$CHART_FILE" "oci://${{ env.HELM_REGISTRY }}/${{ env.HELM_NAMESPACE }}/${{ github.event.repository.name }}"
 
       - name: Push Artifact Hub metadata to OCI registry
         run: |
