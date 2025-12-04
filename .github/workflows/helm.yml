@@ -62,9 +62,13 @@ jobs:
           # Package the chart
           helm package . --destination /tmp
 
-          # Push to OCI registry using the chart name from Chart.yaml
-          CHART_FILE=$(ls /tmp/common-${VERSION}.tgz | head -n 1)
-          helm push "$CHART_FILE" "oci://${{ env.HELM_REGISTRY }}/${{ env.HELM_NAMESPACE }}/${{ github.event.repository.name }}"
+          # rename /tmp/common-${VERSION}.tgz (common) to common-chart
+          mv /tmp/common-${VERSION}.tgz /tmp/common-chart-${VERSION}.tgz
+
+          # Push to OCI registry
+          CHART_FILE=$(ls /tmp/common-chart-${VERSION}.tgz | head -n 1)
+
+          helm push "$CHART_FILE" "oci://${{ env.HELM_REGISTRY }}/${{ env.HELM_NAMESPACE }}"
 
       - name: Push Artifact Hub metadata to OCI registry
         run: |
