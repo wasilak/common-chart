@@ -11,3 +11,13 @@ sources:
 maintainers:
   - email: piotr.m.boruc@gmail.com
     name: wasilak
+
+annotations:
+  artifacthub.io/changes: |
+    - kind: fixed
+      description: "Split ingress templates to prevent duplicate ingress resources when https.enabled is true"
+      links:
+        - name: "PR"
+          url: "https://github.com/wasilak/common-chart/pull/1"
+    - kind: changed
+      description: "ingress.yaml split into ingress-http.yaml and ingress-https.yaml for better organization and clearer logic"
