@@ -72,12 +72,12 @@ spec:
 {{- end }}
 {{- end }}
   tls:
-{{- if empty $.Values.ingress.hosts }}
+{{- if empty $hosts }}
     - hosts:
         - "{{ include "fullname" $ }}.{{ $.Release.Namespace }}.svc.cluster.local"
       secretName: "{{ include "fullname" $ }}-selfsigned-tls-{{ .name }}"
 {{- else }}
-{{- range $.Values.ingress.hosts }}
+{{- range $hosts }}
     - hosts:
 {{- if kindIs "map" . }}
         - "{{ .host }}"
