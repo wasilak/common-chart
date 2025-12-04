@@ -4,6 +4,9 @@ description: A comprehensive, production-ready Helm chart for deploying applicat
 type: application
 version: 1.0.1
 appVersion: "1.0.1"
+home: https://github.com/wasilak/common-chart
+sources:
+  - https://github.com/wasilak/common-chart
 
 maintainers:
   - email: piotr.m.boruc@gmail.com

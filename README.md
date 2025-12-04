@@ -4,6 +4,8 @@
 
 A comprehensive, production-ready Helm chart for deploying applications on Kubernetes
 
+**Homepage:** <https://github.com/wasilak/common-chart>
+
 ## Overview
 
 The **Common Chart** is a comprehensive, production-ready Helm chart for deploying applications on Kubernetes. It provides a flexible, battle-tested foundation for deploying Deployments, StatefulSets, and DaemonSets with sensible defaults and extensive customization options.
@@ -308,6 +310,10 @@ For issues, feature requests, or questions:
 | Name | Email | Url |
 | ---- | ------ | --- |
 | wasilak | <piotr.m.boruc@gmail.com> |  |
+
+## Source Code
+
+* <https://github.com/wasilak/common-chart>
 
 ## Chart Values
 
