@@ -1,5 +1,5 @@
 {{- define "statefulsetVolumes" }}
-{{- if or $.Values.configMaps $.Values.volumes.emptyDir $.Values.volumes.hostPath $.Values.volumes.configMap }}
+{{- if or $.Values.configMaps $.Values.volumes.emptyDir $.Values.volumes.hostPath $.Values.volumes.configMap $.Values.volumes.secret }}
 volumes:
   {{- range $.Values.volumes.emptyDir }}
   - name: "{{ .name }}"
@@ -31,5 +31,15 @@ volumes:
     configMap:
       name: "{{ .name | default (include "fullname" $) }}"
   {{- end }}
-{{- end }}
-{{- end -}}
+  {{- range $.Values.volumes.secret }}
+  - name: "{{ .name }}"
+    secret:
+      secretName: {{ .secretName | default .name }}
+      {{- if .items }}
+      items:
+        {{- toYaml .items | nindent 8 }}
+      {{- end }}
+      defaultMode: {{ .defaultMode | default "0644" }}
+  {{- end }}
+  {{- end }}
+  {{- end -}}

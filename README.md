@@ -1,6 +1,6 @@
 # common
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.1](https://img.shields.io/badge/AppVersion-1.0.1-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.0](https://img.shields.io/badge/AppVersion-1.1.0-informational?style=flat-square)
 
 A comprehensive, production-ready Helm chart for deploying applications on Kubernetes
 
@@ -348,6 +348,7 @@ For issues, feature requests, or questions:
 | volumes.emptyDir | list | `[]` |  |
 | volumes.hostPath | list | `[]` |  |
 | volumes.configMap | list | `[]` |  |
+| volumes.secret | list | `[]` |  |
 | initContainers | list | `[]` |  |
 | lifecycle.preStop | object | `{}` |  |
 | lifecycle.postStart | object | `{}` |  |

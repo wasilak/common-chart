@@ -79,6 +79,13 @@ volumes:
   emptyDir: []
   hostPath: []
   configMap: []
+  secret: []
+    # - name: my-secret
+    #   secretName: my-secret-name
+    #   defaultMode: "0644"
+    #   items:
+    #     - key: secret-key
+    #       path: secret-file.txt
 
 initContainers: []
 

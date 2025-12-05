@@ -332,6 +332,46 @@
               }
             }
           }
+        },
+        "secret": {
+          "type": "array",
+          "description": "Secret volumes",
+          "default": [],
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the volume"
+              },
+              "secretName": {
+                "type": "string",
+                "description": "Name of the Secret (defaults to volume name if not specified)"
+              },
+              "defaultMode": {
+                "type": "string",
+                "description": "Default permissions (e.g., '0644')",
+                "default": "0644"
+              },
+              "items": {
+                "type": "array",
+                "description": "Specific keys to include from the secret",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "description": "Key from the secret"
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "Path where the key should be mounted"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
