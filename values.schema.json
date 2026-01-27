@@ -199,38 +199,54 @@
       "description": "Storage configuration",
       "properties": {
         "persistence": {
-          "type": "array",
-          "description": "Persistent volume configuration for deployments",
-          "default": [],
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "Name of the persistent volume"
-              },
-              "enabled": {
-                "type": "boolean",
-                "description": "Enable persistent volume"
-              },
-              "size": {
-                "type": "string",
-                "description": "Size of the persistent volume (e.g., 10Gi)"
-              },
-              "storageClassName": {
-                "type": "string",
-                "description": "Storage class name"
-              },
-              "accessModes": {
-                "type": "array",
-                "description": "Access modes for the persistent volume",
-                "items": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
+           "type": "array",
+           "description": "Persistent volume and temporary storage configuration for deployments",
+           "default": [],
+           "items": {
+             "type": "object",
+             "properties": {
+               "name": {
+                 "type": "string",
+                 "description": "Name of the volume"
+               },
+               "enabled": {
+                 "type": "boolean",
+                 "description": "Enable volume"
+               },
+               "size": {
+                 "type": "string",
+                 "description": "Size of the persistent volume (e.g., 10Gi). Required for PVC-based volumes."
+               },
+               "storageClassName": {
+                 "type": "string",
+                 "description": "Storage class name for PVC-based volumes"
+               },
+               "accessModes": {
+                 "type": "array",
+                 "description": "Access modes for PVC-based volumes",
+                 "items": {
+                   "type": "string"
+                 }
+               },
+               "emptyDir": {
+                 "type": "object",
+                 "description": "Configuration for emptyDir volume (temporary storage)",
+                 "properties": {
+                   "medium": {
+                     "type": "string",
+                     "description": "Storage medium for emptyDir (e.g., 'Memory')",
+                     "enum": ["", "Memory"]
+                   },
+                   "sizeLimit": {
+                     "type": "string",
+                     "description": "Size limit for emptyDir volume (e.g., 100Mi, 1Gi)"
+                   }
+                 },
+                 "additionalProperties": false
+               }
+             }
+           }
+         }
       }
     },
     "volumeMounts": {

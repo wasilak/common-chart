@@ -65,14 +65,19 @@ env: []
 envFrom: []
 
 storage:
-  # Storage for Deployments (single PVC per pod)
-  persistence: []
-    # - name: data
-    #   enabled: true
-    #   size: 10Gi
-    #   storageClassName: default
-    #   accessModes:
-    #     - ReadWriteOnce
+   # Storage for Deployments (single PVC per pod)
+   persistence: []
+     # - name: data
+     #   enabled: true
+     #   size: 10Gi
+     #   storageClassName: default
+     #   accessModes:
+     #     - ReadWriteOnce
+     # - name: dshm
+     #   enabled: true
+     #   emptyDir:
+     #     medium: Memory
+     #     sizeLimit: 100Mi
 
 volumeMounts: []
 volumes:

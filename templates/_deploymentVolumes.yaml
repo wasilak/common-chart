@@ -1,13 +1,24 @@
 {{- define "deploymentVolumes" }}
 {{- if or $.Values.storage.persistence $.Values.configMaps $.Values.volumes.emptyDir $.Values.volumes.hostPath $.Values.volumes.configMap $.Values.volumes.secret }}
 volumes:
-  {{- range $.Values.storage.persistence }}
-  {{- if .enabled }}
-  - name: "{{ .name }}"
-    persistentVolumeClaim:
-      claimName: "{{ .name }}"
-  {{- end }}
-  {{- end }}
+   {{- range $.Values.storage.persistence }}
+   {{- if .enabled }}
+   {{- if .emptyDir }}
+   - name: "{{ .name }}"
+     emptyDir:
+       {{- if .emptyDir.sizeLimit }}
+       sizeLimit: {{ .emptyDir.sizeLimit }}
+       {{- end }}
+       {{- if .emptyDir.medium }}
+       medium: {{ .emptyDir.medium }}
+       {{- end }}
+   {{- else }}
+   - name: "{{ .name }}"
+     persistentVolumeClaim:
+       claimName: "{{ .name }}"
+   {{- end }}
+   {{- end }}
+   {{- end }}
   {{- range $.Values.volumes.emptyDir }}
   - name: "{{ .name }}"
     emptyDir:
