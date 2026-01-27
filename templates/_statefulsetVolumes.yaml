@@ -1,7 +1,21 @@
 {{- define "statefulsetVolumes" }}
-{{- if or $.Values.configMaps $.Values.volumes.emptyDir $.Values.volumes.hostPath $.Values.volumes.configMap $.Values.volumes.secret }}
+{{- if or $.Values.storage.persistence $.Values.configMaps $.Values.volumes.emptyDir $.Values.volumes.hostPath $.Values.volumes.configMap $.Values.volumes.secret }}
 volumes:
-  {{- range $.Values.volumes.emptyDir }}
+   {{- range $.Values.storage.persistence }}
+   {{- if .enabled }}
+   {{- if .emptyDir }}
+   - name: "{{ .name }}"
+     emptyDir:
+       {{- if .emptyDir.sizeLimit }}
+       sizeLimit: {{ .emptyDir.sizeLimit }}
+       {{- end }}
+       {{- if .emptyDir.medium }}
+       medium: {{ .emptyDir.medium }}
+       {{- end }}
+   {{- end }}
+   {{- end }}
+   {{- end }}
+   {{- range $.Values.volumes.emptyDir }}
   - name: "{{ .name }}"
     emptyDir:
       {{- if .sizeLimit }}
