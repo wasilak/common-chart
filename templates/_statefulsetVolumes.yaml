@@ -2,7 +2,7 @@
 {{- if or $.Values.storage.persistence $.Values.configMaps $.Values.volumes.emptyDir $.Values.volumes.hostPath $.Values.volumes.configMap $.Values.volumes.secret }}
 volumes:
    {{- range $.Values.storage.persistence }}
-   {{- if .enabled }}
+   {{- if or .enabled .emptyDir }}
    {{- if .emptyDir }}
    - name: "{{ .name }}"
      emptyDir:
