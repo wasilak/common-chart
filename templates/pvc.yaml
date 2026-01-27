@@ -1,7 +1,7 @@
 {{- if eq (.Values.type) "deployment" -}}
 {{- if $.Values.storage.persistence }}
 {{- range $.Values.storage.persistence }}
-{{- if and (.enabled) (not .emptyDir) }}
+{{- if and .enabled (not .emptyDir) }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
