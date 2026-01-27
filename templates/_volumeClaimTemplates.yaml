@@ -17,7 +17,7 @@ volumeClaimTemplates:
           storage: {{ .size | default "10Gi" }}
   {{- end }}
   {{- range $.Values.storage.persistence }}
-  {{- if and .enabled (eq $.Values.type "statefulset") }}
+  {{- if and .enabled .storageClassName (eq $.Values.type "statefulset") }}
   - apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
