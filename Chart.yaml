@@ -2,8 +2,8 @@ apiVersion: v2
 name: common
 description: A comprehensive, production-ready Helm chart for deploying applications on Kubernetes
 type: application
-version: 1.2.5
-appVersion: "1.2.5"
+version: 1.2.6
+appVersion: "1.2.6"
 home: https://github.com/wasilak/common-chart
 sources:
   - https://github.com/wasilak/common-chart
