@@ -242,7 +242,7 @@ Simulate workflow commands locally:
 
 ```bash
 # Extract version from git tag format
-TAG="v1.2.6"
+TAG="v1.2.7"
 VERSION=${TAG#v}
 echo "Chart version: $VERSION"
 
@@ -351,16 +351,16 @@ When running the GitHub Actions workflow:
 
 ```bash
 # Expected OCI registry path:
-# oci://ghcr.io/wasilak/common-chart:v1.2.6
+# oci://ghcr.io/wasilak/common-chart:v1.2.7
 
 # Manual test (requires Docker credentials):
-helm push common-1.2.6.tgz oci://ghcr.io/wasilak/common-chart/
+helm push common-1.2.7.tgz oci://ghcr.io/wasilak/common-chart/
 
 # Pull from registry:
-helm pull oci://ghcr.io/wasilak/common-chart --version 1.2.6
+helm pull oci://ghcr.io/wasilak/common-chart --version 1.2.7
 
 # View manifests from registry:
-helm show values oci://ghcr.io/wasilak/common-chart --version 1.2.6
+helm show values oci://ghcr.io/wasilak/common-chart --version 1.2.7
 ```
 
 ## Troubleshooting
