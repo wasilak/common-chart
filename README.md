@@ -389,12 +389,13 @@ For issues, feature requests, or questions:
 | ports[0].containerPort | int | `2000` |  |
 | ports[0].servicePort | int | `2000` |  |
 | ports[0].protocol | string | `"TCP"` |  |
-| ports[0].ingressEnabled | bool | `true` |  |
+| ports[0].ingress[0].host | string | `"example.com"` |  |
+| ports[0].ingress[0].paths[0].path | string | `"/"` |  |
+| ports[0].ingress[0].paths[0].pathType | string | `"Prefix"` |  |
 | ports[0].scrape.enabled | bool | `false` |  |
 | ports[0].scrape.path | string | `"/metrics"` |  |
 | command | list | `[]` |  |
 | args | list | `[]` |  |
-| ingress.hosts | list | `[]` |  |
 | startupProbeEnabled | bool | `false` |  |
 | startupProbe.httpGet.path | string | `"/health"` |  |
 | startupProbe.httpGet.port | string | `"http"` |  |

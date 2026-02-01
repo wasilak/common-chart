@@ -154,27 +154,28 @@ service:
   externalTrafficPolicy: Cluster
 
 ports:
-  - name: http
-    containerPort: 2000
-    servicePort: 2000
-    protocol: TCP
-    ingressEnabled: true
-    scrape:
-      enabled: false
-      path: /metrics
-      # metricRelabelings:
-      #   - action: replace
-      #     regex: (.*)
-      #     replacement: ${1}
-      #     sourceLabels:
-      #       - service_instance_id
-      #     targetLabel: instance
+   - name: http
+     containerPort: 2000
+     servicePort: 2000
+     protocol: TCP
+     ingress:
+       - host: example.com
+         paths:
+           - path: /
+             pathType: Prefix
+     scrape:
+       enabled: false
+       path: /metrics
+       # metricRelabelings:
+       #   - action: replace
+       #     regex: (.*)
+       #     replacement: ${1}
+       #     sourceLabels:
+       #       - service_instance_id
+       #     targetLabel: instance
 
 command: []
 args: []
-
-ingress:
-  hosts: []
 
 startupProbeEnabled: false
 startupProbe:

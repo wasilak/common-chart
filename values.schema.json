@@ -717,12 +717,38 @@
             "description": "Protocol (TCP, UDP, etc.)",
             "default": "TCP"
           },
-          "ingressEnabled": {
-            "type": "boolean",
-            "description": "Enable ingress for this port",
-            "default": false
-          },
-          "scrape": {
+          "ingress": {
+             "type": "array",
+             "description": "Ingress configuration for this port",
+             "items": {
+               "type": "object",
+               "properties": {
+                 "host": {
+                   "type": "string",
+                   "description": "Hostname for the ingress"
+                 },
+                 "paths": {
+                   "type": "array",
+                   "description": "Paths for the hostname",
+                   "items": {
+                     "type": "object",
+                     "properties": {
+                       "path": {
+                         "type": "string",
+                         "description": "URL path"
+                       },
+                       "pathType": {
+                         "type": "string",
+                         "description": "Path type (Prefix, Exact, ImplementationSpecific)",
+                         "enum": ["Prefix", "Exact", "ImplementationSpecific"]
+                       }
+                     }
+                   }
+                 }
+               }
+             }
+           },
+           "scrape": {
             "type": "object",
             "description": "Prometheus scrape configuration",
             "properties": {
@@ -787,44 +813,7 @@
         "type": "string"
       }
     },
-    "ingress": {
-      "type": "object",
-      "description": "Ingress configuration",
-      "properties": {
-        "hosts": {
-          "type": "array",
-          "description": "Ingress hosts",
-          "default": [],
-          "items": {
-            "type": "object",
-            "properties": {
-              "host": {
-                "type": "string",
-                "description": "Hostname for the ingress"
-              },
-              "paths": {
-                "type": "array",
-                "description": "Paths for the hostname",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "path": {
-                      "type": "string",
-                      "description": "URL path"
-                    },
-                    "pathType": {
-                      "type": "string",
-                      "description": "Path type (Prefix, Exact, ImplementationSpecific)",
-                      "enum": ["Prefix", "Exact", "ImplementationSpecific"]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
+
     "startupProbeEnabled": {
       "type": "boolean",
       "description": "Enable startup probe",

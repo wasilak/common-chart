@@ -1,91 +1,57 @@
 {{- if $.Values.https.enabled }}
 {{- range $.Values.ports }}
 {{- if not .nonHTTP -}}
-{{- if .ingressEnabled | default true }}
+{{- if .ingress }}
 {{- $portName := .name }}
-{{- $hosts := $.Values.ingress.hosts }}
 {{- $middlewares := list }}
 {{- if $.Values.auth.enabled }}
-  {{- $middlewares = append $middlewares (printf "%s-%s-%s@kubernetescrd" $.Release.Namespace $.Values.auth.type (include "fullname" $)) }}
+   {{- $middlewares = append $middlewares (printf "%s-%s-%s@kubernetescrd" $.Release.Namespace $.Values.auth.type (include "fullname" $)) }}
 {{- end }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  {{- include "labels" $ | indent 2 }}
-  annotations:
-    spec.ingressClassName: traefik
-    cert-manager.io/cluster-issuer: ca-issuer
-    traefik.ingress.kubernetes.io/router.entrypoints: "{{ .entryPoint | default (print "websecure") }}"
-    {{- if $middlewares }}
-    traefik.ingress.kubernetes.io/router.middlewares: "{{ join "," $middlewares }}"
-    {{- end }}
-  name: "{{ include "fullname" $ }}-{{ .name }}-https"
+   {{- include "labels" $ | indent 2 }}
+   annotations:
+     spec.ingressClassName: traefik
+     cert-manager.io/cluster-issuer: ca-issuer
+     traefik.ingress.kubernetes.io/router.entrypoints: "{{ .entryPoint | default (print "websecure") }}"
+     {{- if $middlewares }}
+     traefik.ingress.kubernetes.io/router.middlewares: "{{ join "," $middlewares }}"
+     {{- end }}
+   name: "{{ include "fullname" $ }}-{{ .name }}-https"
 spec:
-  ingressClassName: traefik
-  rules:
-{{- if empty $hosts }}
-    - host: "{{ include "fullname" $ }}.{{ $.Release.Namespace }}.svc.cluster.local"
-      http:
-        paths:
-          - path: "/"
-            backend:
-              service:
-                name: "{{ include "fullname" $ }}"
-                port:
-                  name: {{ $portName }}
-            pathType: ImplementationSpecific
-{{- else }}
-{{- range $hosts }}
-    - host: "{{ if kindIs "map" . }}{{ .host }}{{ else }}{{ . }}{{ end }}"
-      http:
-        paths:
-{{- if kindIs "map" . }}
+   ingressClassName: traefik
+   rules:
+{{- range .ingress }}
+     - host: "{{ .host }}"
+       http:
+         paths:
 {{- if .paths }}
 {{- range .paths }}
-          - path: "{{ . }}"
-            backend:
-              service:
-                name: "{{ include "fullname" $ }}"
-                port:
-                  name: {{ $portName }}
-            pathType: ImplementationSpecific
+           - path: "{{ .path }}"
+             backend:
+               service:
+                 name: "{{ include "fullname" $ }}"
+                 port:
+                   name: {{ $portName }}
+             pathType: {{ .pathType | default "ImplementationSpecific" }}
 {{- end }}
 {{- else }}
-          - path: "/"
-            backend:
-              service:
-                name: "{{ include "fullname" $ }}"
-                port:
-                  name: {{ $portName }}
-            pathType: ImplementationSpecific
-{{- end }}
-{{- else }}
-          - path: "/"
-            backend:
-              service:
-                name: "{{ include "fullname" $ }}"
-                port:
-                  name: {{ $portName }}
-            pathType: ImplementationSpecific
+           - path: "/"
+             backend:
+               service:
+                 name: "{{ include "fullname" $ }}"
+                 port:
+                   name: {{ $portName }}
+             pathType: ImplementationSpecific
 {{- end }}
 {{- end }}
-{{- end }}
-  tls:
-{{- if empty $hosts }}
-    - hosts:
-        - "{{ include "fullname" $ }}.{{ $.Release.Namespace }}.svc.cluster.local"
-      secretName: "{{ include "fullname" $ }}-selfsigned-tls-{{ .name }}"
-{{- else }}
-{{- range $hosts }}
-    - hosts:
-{{- if kindIs "map" . }}
-        - "{{ .host }}"
-      secretName: "{{ include "fullname" $ }}-selfsigned-tls-{{ .host | replace "." "-" }}"
-{{- else }}
-        - "{{ . }}"
-      secretName: "{{ include "fullname" $ }}-selfsigned-tls-{{ . | replace "." "-" }}"
-{{- end }}
+   tls:
+{{- range .ingress }}
+     - hosts:
+         - "{{ .host }}"
+       secretName: "{{ include "fullname" $ }}-selfsigned-tls-{{ .host | replace "." "-" }}"
 {{- end }}
 {{- end }}
 {{- end -}}
