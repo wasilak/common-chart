@@ -51,17 +51,26 @@
 
 {{ end -}}
 
-{{ if .Values.ingress.hosts -}}
+{{ $hasIngress := false }}
+{{ range .Values.ports }}
+{{ if .ingress }}
+{{ $hasIngress = true }}
+{{ end }}
+{{ end }}
+{{ if $hasIngress -}}
 ⚙️  INGRESS ACCESS
 
-  Ingress is enabled with the following hosts:
-{{ range .Values.ingress.hosts }}
-    - {{ .host }}
+   Ingress is enabled for the following ports and hosts:
+{{ range $port := .Values.ports }}
+{{ if $port.ingress }}
+   Port: {{ $port.name }}
+{{ range $port.ingress }}
+     - {{ .host }}
+{{ end }}
+{{ end }}
 {{ end }}
 
-  Make sure your ingress controller is running and DNS is configured for these hostnames.
-  Then access the application at:
-    https://{{ (index .Values.ingress.hosts 0).host }}
+   Make sure your ingress controller is running and DNS is configured for these hostnames.
 
 {{ end -}}
 
