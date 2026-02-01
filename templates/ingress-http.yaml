@@ -24,30 +24,30 @@ metadata:
 spec:
    ingressClassName: traefik
    rules:
-{{- range .ingress }}
-     - host: "{{ .host }}"
-       http:
-         paths:
-{{- if .paths }}
-{{- range .paths }}
-           - path: "{{ .path }}"
-             backend:
-               service:
-                 name: "{{ include "fullname" $ }}"
-                 port:
-                   name: {{ $portName }}
-             pathType: {{ .pathType | default "ImplementationSpecific" }}
-{{- end }}
-{{- else }}
-           - path: "/"
-             backend:
-               service:
-                 name: "{{ include "fullname" $ }}"
-                 port:
-                   name: {{ $portName }}
-             pathType: ImplementationSpecific
-{{- end }}
-{{- end }}
+   {{- range .ingress }}
+   - host: "{{ .host }}"
+     http:
+       paths:
+       {{- if .paths }}
+       {{- range .paths }}
+       - path: "{{ .path }}"
+         backend:
+           service:
+             name: "{{ include "fullname" $ }}"
+             port:
+               name: {{ $portName }}
+         pathType: {{ .pathType | default "ImplementationSpecific" }}
+       {{- end }}
+       {{- else }}
+       - path: "/"
+         backend:
+           service:
+             name: "{{ include "fullname" $ }}"
+             port:
+               name: {{ $portName }}
+         pathType: ImplementationSpecific
+       {{- end }}
+   {{- end }}
 {{- end }}
 {{- end -}}
 {{- end -}}
