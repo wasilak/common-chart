@@ -13,14 +13,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-   {{- include "labels" $ | indent 2 }}
-   annotations:
-     spec.ingressClassName: traefik
-     traefik.ingress.kubernetes.io/router.entrypoints: "web"
-     {{- if $middlewares }}
-     traefik.ingress.kubernetes.io/router.middlewares: "{{ join "," $middlewares }}"
-     {{- end }}
-   name: "{{ include "fullname" $ }}-{{ .name }}-http"
+  {{- include "labels" $ | indent 2 }}
+  annotations:
+    spec.ingressClassName: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: "web"
+    {{- if $middlewares }}
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ join "," $middlewares }}"
+    {{- end }}
+  name: "{{ include "fullname" $ }}-{{ .name }}-http"
 spec:
    ingressClassName: traefik
    rules:
